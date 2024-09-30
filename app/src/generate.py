@@ -33,6 +33,8 @@ async def extract_product_info_from_images(image_files):
         prompt = """
         Analyze the given images of a food product and its packaging. 
         Extract useful information like Product Info, Ingredients, Nutritional Information, Claims.
+        When extracting nutritional information also mention the scale of the measuring like per serving or per 100g, it is very useful
+        in maintaing the same scale for all the products.
         Return the response in markdown format.
         """
         response = model.generate_content([*images, prompt])
@@ -102,6 +104,7 @@ async def generate_structured_product_data(markdown_content, image_analysis_outp
             - Identify claims as promises about nutrition, strength, fruit content etc,you can ignore claims about taste or something like that.\
                 We are purely focused on the health related claims of the product.\n/
             - Categorize the purpose and frequency of the product correctly.
+            - Identifying the weight of the product is very important, keep it accurate.
             - Convert the nutrient information into a list of individual nutrient details, each separated by a comma.\
              Ensure that each nutrient name is followed by its value, and any percentage daily value (DV) is mentioned in parentheses wherever applicable
             - When calculating the nutrient information, give all the information relative to the entire product(not per serving or per 100g or anything like that\

@@ -8,7 +8,6 @@ from app.src.generate import (
 )
 from app.src.scrape import scrape_product_page
 
-
 async def process_product_url(url):
     markdown_content, image_links, product_image_url = await scrape_product_page(url)
 
