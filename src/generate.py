@@ -1,5 +1,16 @@
-from src.config import GENERATION_CONFIG, HarmCategory, HarmBlockThreshold, genai, BytesIO, Image, base64, content
 import json
+
+from src.config import (
+    GENERATION_CONFIG,
+    BytesIO,
+    HarmBlockThreshold,
+    HarmCategory,
+    Image,
+    base64,
+    content,
+    genai,
+)
+
 
 async def extract_product_info_from_images(image_files):
     if not image_files:

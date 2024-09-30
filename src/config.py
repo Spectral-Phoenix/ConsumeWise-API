@@ -1,15 +1,16 @@
 import asyncio
-import re
-import os
-import json
-from io import BytesIO
-from PIL import Image
-from crawl4ai import AsyncWebCrawler
-import google.generativeai as genai
-from google.ai.generativelanguage_v1beta.types import content
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
-import aiohttp
 import base64
+import json
+import os
+import re
+from io import BytesIO
+
+import aiohttp
+import google.generativeai as genai
+from crawl4ai import AsyncWebCrawler
+from google.ai.generativelanguage_v1beta.types import content
+from google.generativeai.types import HarmBlockThreshold, HarmCategory
+from PIL import Image
 
 genai.configure(api_key=os.environ["API_KEY"])
 

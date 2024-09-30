@@ -1,8 +1,11 @@
 import asyncio
-import aiohttp
 import re
-from src.config import AsyncWebCrawler
 from urllib.parse import urlparse
+
+import aiohttp
+
+from src.config import AsyncWebCrawler
+
 
 async def scrape_product_page(url):
     parsed_url = urlparse(url)
@@ -49,7 +52,7 @@ async def scrape_product_page(url):
             # Extract image links using regex
             image_matches = re.findall(r'(https://www\.bigbasket\.com/media/uploads/[^)]+\.(?:jpg|jpeg))', markdown_content)
             
-            image_links = []  # Initialize even if no matches are found
+            image_links = []
             for base_image_link in image_matches:
                 parts = base_image_link.split("_")
                 for j in range(1, 10):
@@ -58,7 +61,6 @@ async def scrape_product_page(url):
 
             valid_image_links = []
 
-            # Check validity of image links concurrently with rate limiting
             conn = aiohttp.TCPConnector(limit=10)
             async with aiohttp.ClientSession(connector=conn) as session:
                 async def validate_link(link):
