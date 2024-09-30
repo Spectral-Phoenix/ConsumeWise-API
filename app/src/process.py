@@ -9,16 +9,12 @@ from app.src.scrape import scrape_product_page
 
 
 async def download_image(client: httpx.AsyncClient, url: str, index: int) -> bytes:
-    # Implementation to download image using httpx
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-        "Referer": "https://www.google.com"
-    }
-    response = await client.get(url, headers=headers)
+    # Implementation to download image using the provided API
+    api_url = f"https://white-wind-98e6.dtgetleni.workers.dev/?url={url}"
+    response = await client.get(api_url)
     if response.status_code == 200:
         return response.content
-    print(f"Error downloading image {index} from {url}: {response.status_code}")
+    print(f"Error downloading image {index} from {url} via API: {response.status_code}")
     return None
 
 
