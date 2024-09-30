@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from process import process_product_url
+from src.process import process_product_url
 
 app = FastAPI()
 
@@ -15,7 +15,6 @@ async def process_product(product: ProductURL):
     The product URL is passed as part of the request body.
     """
     try:
-        print(product.url)
         structured_data = await process_product_url(product.url)
         return structured_data
 
