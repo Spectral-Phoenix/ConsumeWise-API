@@ -14,7 +14,7 @@ async def process_product_url(url):
 
     async with aiohttp.ClientSession() as session:
         image_files = [img for img in await asyncio.gather(*[download_image(session, link, i) for i, link in enumerate(image_links)]) if img]
-
+    print(len(image_files))
     image_analysis_output = await extract_product_info_from_images(image_files)
     print(f"Image Analysis Output:\n{image_analysis_output}")
     structured_data = await generate_structured_product_data(markdown_content, image_analysis_output)
