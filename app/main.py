@@ -7,12 +7,12 @@ from app.src.process import process_product_image, process_product_url
 
 app = FastAPI()
 
-class ProductURLs(BaseModel):
-    urls: List[str]
+class ProductURL(BaseModel):
+    url: str
 
 @app.post("/process_products")
 async def process_products(
-    products: Optional[ProductURLs] = None,
+    product: Optional[ProductURL] = None,
     images: Optional[List[UploadFile]] = File(None)
 ):
     results = []
@@ -26,13 +26,12 @@ async def process_products(
             structured_data = await process_product_image(image_contents)
             results.append(structured_data)
 
-        elif products and products.urls:
-            for url in products.urls:
-                structured_data = await process_product_url(url)
-                results.append(structured_data)
+        elif product and product.url:
+            structured_data = await process_product_url(product.url)
+            results.append(structured_data)
 
         else:
-            raise HTTPException(status_code=400, detail="No URLs or images provided.")
+            raise HTTPException(status_code=400, detail="No URL or images provided.")
 
         return results
 
