@@ -7,7 +7,6 @@ from app.src.generate import (
 )
 from app.src.scrape import scrape_product_page
 
-
 async def download_image(client: httpx.AsyncClient, url: str, index: int) -> bytes:
     # Implementation to download image using the provided API
     api_url = f"https://white-wind-98e6.dtgetleni.workers.dev/?url={url}"
