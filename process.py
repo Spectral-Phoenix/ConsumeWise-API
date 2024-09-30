@@ -1,10 +1,12 @@
 import asyncio
 import re
 import os
+import json
 from io import BytesIO
 from PIL import Image
 from crawl4ai import AsyncWebCrawler
 import google.generativeai as genai
+from google.ai.generativelanguage_v1beta.types import content
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import aiohttp
 import base64
@@ -17,7 +19,6 @@ GENERATION_CONFIG = {
     "top_k": 64,
     "max_output_tokens": 1000,
 }
-
 
 async def download_image(session, url, index):
     try:
@@ -41,7 +42,7 @@ async def extract_product_info_from_images(image_files):
 
     try:
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash", 
+            model_name="gemini-1.5-flash-exp-0827", 
             generation_config=GENERATION_CONFIG,
             safety_settings={
                 HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
@@ -62,7 +63,67 @@ async def extract_product_info_from_images(image_files):
 
 async def generate_structured_product_data(markdown_content, image_analysis_output):
     try:
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config={**GENERATION_CONFIG, "response_mime_type": "application/json"})
+        NEW_GENERATION_CONFIG = {
+          "temperature": 0.7,
+          "top_p": 0.95,
+          "top_k": 64,
+          "max_output_tokens": 8192,
+          "response_schema": content.Schema(
+            type = content.Type.OBJECT,
+            properties = {
+              "product_name": content.Schema(
+                type = content.Type.STRING,
+              ),
+              "ingredients": content.Schema(
+                type = content.Type.STRING,
+              ),
+              "nutritional_information": content.Schema(
+                type = content.Type.STRING,
+              ),
+              "product_details": content.Schema(
+                type = content.Type.OBJECT,
+                properties = {
+                  "brand_name": content.Schema(
+                    type = content.Type.STRING,
+                  ),
+                  "weight": content.Schema(
+                    type = content.Type.STRING,
+                  ),
+                  "category": content.Schema(
+                    type = content.Type.OBJECT,
+                    properties = {
+                      "purpose": content.Schema(
+                        type = content.Type.STRING,
+                      ),
+                      "frequency": content.Schema(
+                        type = content.Type.STRING,
+                      ),
+                    },
+                  ),
+                },
+              ),
+              "claims": content.Schema(
+                type = content.Type.STRING,
+              ),
+            },
+          ),
+          "response_mime_type": "application/json",
+        }
+
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash-exp-0827", 
+            generation_config=NEW_GENERATION_CONFIG,
+            safety_settings={
+                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE
+            },
+            system_instruction="""
+            - Identify claims as promises about nutrition, strength, fruit content etc,you can ignore claims about taste or something like that.\
+                We are purely focused on the health related claims of the product.\n/
+            - List the nutritional information seperated by commas, no need to represent in tabular format.
+            """)
         
         custom_prompt = f"""
         Generate a JSON product description from the following:
@@ -76,27 +137,20 @@ async def generate_structured_product_data(markdown_content, image_analysis_outp
         ```markdown
         {image_analysis_output}
         ```
-
-        Use this JSON schema:
-        {{
-            "product_name":"",
-            "ingredients":"",
-            "nutritional_information":"",
-            "product_details":{{
-                "brand_name":"",
-                "weight":"",
-                "category":{{
-                    "purpose":"",
-                    "frequency":""
-                }}
-            }}
-        }}
         """
 
         response = model.generate_content(custom_prompt)
-        return response.text
+        
+        # Parse the JSON output
+        try:
+            structured_data = json.loads(response.text)
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON: {e}")
+            structured_data = {"error": "Failed to parse JSON output"}
+
+        return structured_data
     except Exception as e:
-        return f"An error occurred during structured data generation: {str(e)}"
+        return {"error": f"An error occurred during structured data generation: {str(e)}"}
 
 async def process_product_url(url):
     async with AsyncWebCrawler(verbose=False) as crawler:
@@ -129,4 +183,8 @@ async def process_product_url(url):
         image_analysis_output = await extract_product_info_from_images(image_files)
         structured_data = await generate_structured_product_data(final_markdown_content, image_analysis_output)
 
+        # Print the response
         return structured_data
+
+# Example usage:
+# asyncio.run(process_product_url("https://grofers.com/prn/britannia-marie-gold-biscuit/prid/184024")) 
