@@ -1,0 +1,13 @@
+{
+    "product_name":"",
+    "ingredients":"",
+    "nutritional_information":"",
+    "product_details":{
+        "brand_name":"",
+        "weight":"",
+        "category":{
+            "purpose":"",
+            "frequency":""
+        }
+    }
+}
