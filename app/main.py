@@ -1,39 +1,38 @@
-from typing import List, Optional
-
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, HTTPException, UploadFile
 from pydantic import BaseModel
-
-from app.src.process import process_product_image, process_product_url
+from typing import Optional, List
+from app.src.process import process_product_url, process_product_image
 
 app = FastAPI()
 
-class ProductURL(BaseModel):
-    url: str
+class ProductInput(BaseModel):
+    url: Optional[str] = None
+    images: Optional[List[UploadFile]] = None
 
-@app.post("/process_products")
-async def process_products(
-    product: Optional[ProductURL] = None,
-    images: Optional[List[UploadFile]] = File(None)
-):
-    results = []
+@app.post("/process_product")
+async def process_product(product: ProductInput):
+    """
+    Process a product URL or images and extract structured data.
+
+    The product URL or images are passed as part of the request body.
+    """
     try:
-        if images:
-            if len(images) > 5:
-                raise HTTPException(status_code=400, detail="You can upload up to 5 images only.")
-
-            image_contents = [await image.read() for image in images]
-
-            structured_data = await process_product_image(image_contents)
-            results.append(structured_data)
-
-        elif product and product.url:
+        if product.url:
             structured_data = await process_product_url(product.url)
-            results.append(structured_data)
-
+        elif product.images:
+            if len(product.images) > 5:
+                raise HTTPException(status_code=400, detail="Maximum of 5 images allowed")
+            
+            structured_data = []
+            for image in product.images:
+                # Read the image file and process it
+                image_content = await image.read()
+                image_data = await process_product_image(image_content)
+                structured_data.append(image_data)
         else:
-            raise HTTPException(status_code=400, detail="No URL or images provided.")
+            raise HTTPException(status_code=400, detail="Either URL or images must be provided")
 
-        return results
+        return structured_data
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
