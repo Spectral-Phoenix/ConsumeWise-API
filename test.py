@@ -1,32 +1,16 @@
-from fastapi import FastAPI, HTTPException, UploadFile
-from pydantic import BaseModel
-from typing import Optional
-from app.src.process import process_product_url, process_product_image
+import requests
 
-app = FastAPI()
+# Define the URL of your FastAPI application
+url = "https://consumewise-253339989916.us-central1.run.app/process_product"
 
-class ProductInput(BaseModel):
-    url: Optional[str] = None
-    image: Optional[UploadFile] = None
+# Define the payload with the URL
+payload = {
+    "url":"https://blinkit.com/prn/coca-cola-soft-drink-750-ml-pack-of-2/prid/396483"
+}
 
-@app.post("/process_product")
-async def process_product(product: ProductInput):
-    """
-    Process a product URL or image and extract structured data.
+# Send the POST request
+response = requests.post(url, json=payload)
 
-    The product URL or image is passed as part of the request body.
-    """
-    try:
-        if product.url:
-            structured_data = await process_product_url(product.url)
-        elif product.image:
-            # Read the image file and process it
-            image_content = await product.image.read()
-            structured_data = await process_product_image(image_content)
-        else:
-            raise HTTPException(status_code=400, detail="Either URL or image must be provided")
-
-        return structured_data
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
+# Print the response
+print("Status Code:", response.status_code)
+print("Response Body:", response.json())

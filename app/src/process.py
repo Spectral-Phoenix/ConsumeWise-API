@@ -16,7 +16,9 @@ async def process_product_url(url):
         image_files = [img for img in await asyncio.gather(*[download_image(session, link, i) for i, link in enumerate(image_links)]) if img]
 
     image_analysis_output = await extract_product_info_from_images(image_files)
+    print(f"Image Analysis Output:\n{image_analysis_output}")
     structured_data = await generate_structured_product_data(markdown_content, image_analysis_output)
+    # print(f"Structured Output:\n{structured_data}")
 
     structured_data['product_image_url'] = product_image_url 
 
