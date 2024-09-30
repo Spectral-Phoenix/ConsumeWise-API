@@ -6,7 +6,6 @@ from app.src.config import (
     HarmBlockThreshold,
     HarmCategory,
     Image,
-    base64,
     content,
     genai,
 )
@@ -26,7 +25,7 @@ async def extract_product_info_from_images(image_files):
                 HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
                 HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE
             })
-        images = [Image.open(BytesIO(base64.b64decode(img))) for img in image_files if img]
+        images = [Image.open(BytesIO(img)) for img in image_files if img]
         
         if not images:
             return "No valid images found in the provided data."
