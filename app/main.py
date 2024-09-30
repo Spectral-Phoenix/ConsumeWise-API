@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
-from src.process import process_product_image, process_product_url
+from app.src.process import process_product_image, process_product_url
 
 app = FastAPI()
 

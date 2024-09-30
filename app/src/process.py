@@ -1,12 +1,12 @@
 import asyncio
 from typing import List
 
-from src.config import aiohttp, download_image
-from src.generate import (
+from app.src.config import aiohttp, download_image
+from app.src.generate import (
     extract_product_info_from_images,
     generate_structured_product_data,
 )
-from src.scrape import scrape_product_page
+from app.src.scrape import scrape_product_page
 
 
 async def process_product_url(url):

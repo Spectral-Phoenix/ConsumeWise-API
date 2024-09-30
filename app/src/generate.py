@@ -1,6 +1,6 @@
 import json
 
-from src.config import (
+from app.src.config import (
     GENERATION_CONFIG,
     BytesIO,
     HarmBlockThreshold,

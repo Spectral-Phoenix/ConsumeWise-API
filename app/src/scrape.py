@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 import aiohttp
 
-from src.config import AsyncWebCrawler
+from app.src.config import AsyncWebCrawler
 
 
 async def scrape_product_page(url):
