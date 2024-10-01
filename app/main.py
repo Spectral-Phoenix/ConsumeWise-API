@@ -23,11 +23,13 @@ class ProductInput(BaseModel):
 async def process_product(product: ProductInput):
     try:
         if product.url:
-            parsed_url = urlparse(product.url)
+            # Convert the HttpUrl object to a string
+            url_str = str(product.url)
+            parsed_url = urlparse(url_str)
             if parsed_url.netloc != "www.bigbasket.com":
-                raise HTTPException(status_code=400, detail="Only URLs from 'bigbasket.com' are allowed for now")
+                raise HTTPException(status_code=400, detail="Only URLs from 'bigbasket.com' are allowed for now!")
             
-            structured_data = await process_product_url(product.url)
+            structured_data = await process_product_url(url_str)
         elif product.images:
             if len(product.images) > 5:
                 raise HTTPException(status_code=400, detail="Maximum of 5 images allowed")
