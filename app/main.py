@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 from typing import Optional, List
-from app.src.process import process_product_url, process_product_image 
+from app.src.process import process_product_url, process_product_image
+from urllib.parse import urlparse
 
 app = FastAPI()
 
@@ -15,18 +16,17 @@ app.add_middleware(
 )
 
 class ProductInput(BaseModel):
-    url: Optional[str] = None
+    url: Optional[HttpUrl] = None
     images: Optional[List[UploadFile]] = None
 
 @app.post("/process_product")
 async def process_product(product: ProductInput):
-    """
-    Process a product URL or images and extract structured data.
-
-    The product URL or images are passed as part of the request body.
-    """
     try:
         if product.url:
+            parsed_url = urlparse(product.url)
+            if parsed_url.netloc != "www.bigbasket.com":
+                raise HTTPException(status_code=400, detail="Only URLs from 'bigbasket.com' are allowed for now")
+            
             structured_data = await process_product_url(product.url)
         elif product.images:
             if len(product.images) > 5:
@@ -44,4 +44,4 @@ async def process_product(product: ProductInput):
         return structured_data
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {e}") 
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
