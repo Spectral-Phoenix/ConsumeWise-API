@@ -1,9 +1,18 @@
 from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
-from app.src.process import process_product_url, process_product_image
+from app.src.process import process_product_url, process_product_image 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"], 
+    allow_headers=["*"], 
+)
 
 class ProductInput(BaseModel):
     url: Optional[str] = None
@@ -35,4 +44,4 @@ async def process_product(product: ProductInput):
         return structured_data
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}") 
