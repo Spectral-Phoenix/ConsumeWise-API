@@ -6,7 +6,6 @@ import aiohttp
 
 from app.src.config import AsyncWebCrawler
 
-
 async def scrape_product_page(url):
     parsed_url = urlparse(url)
     domain = parsed_url.netloc
