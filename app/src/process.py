@@ -8,6 +8,7 @@ from app.src.config import aiohttp, download_image
 from app.src.generate import (
     extract_product_info_from_images,
     generate_structured_product_data,
+    analyze_product_info,
 )
 from app.src.scrape import scrape_product_page
 
@@ -53,6 +54,12 @@ async def process_product_image(image_contents: List[bytes]):
     image_analysis_output = await extract_product_info_from_images(image_contents)
     structured_data = await generate_structured_product_data(None, image_analysis_output)
     return structured_data
+
+
+async def analyze_data(text):
+
+    analysis_output = await analyze_product_info(text)
+    return analysis_output
 
 # Example usage:
 # asyncio.run(process_product_url("https://example.com/product"))

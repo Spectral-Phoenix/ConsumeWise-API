@@ -11,6 +11,49 @@ from app.src.config import (
     genai,
 )
 
+async def analyze_product_info(text):
+    
+    try:
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash-exp-0827", 
+            generation_config=GENERATION_CONFIG,
+            safety_settings={
+                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE
+            })
+
+        prompt = f"""
+        You will be given data about a product and a user's dietary preferences and other information.
+        Your job is to carefully analyze the product data and user data and provide an output on whether the given product is good or bad for the user. 
+        Provide the output in the form of a list of points. Also, support your decision with reasons why it is good/bad.
+
+        Instructions:
+        Keep the analysis clear and concise
+        The user will see your analysis, so address user as you
+        Make it personalized
+        
+        Output format (JSON):
+        {{
+          "analysis": ["...", "...", "...", ....]
+        }}
+
+        Data to Analyze:
+        {text}
+        """
+        response = model.generate_content(prompt)
+         # Parse the JSON output
+        try:
+            structured_analysis = json.loads(response.text)
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON: {e}")
+            structured_analysis = {"error": "Failed to parse JSON output"}
+
+        return structured_analysis
+    except Exception as e:
+        return f"An error occurred during product analysis: {str(e)}"
+
 async def extract_product_info_from_images(image_files):
     if not image_files:
         return "No images were successfully downloaded."
